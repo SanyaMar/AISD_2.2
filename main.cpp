@@ -91,4 +91,77 @@ namespace fun {
 		}
 
 	};
+
+
+	template < typename T>
+
+	class LinkedList {
+	private:
+		Node<T>* _head;
+		Node<T>* _tail;
+	public:
+		LinkedList() : _head(nullptr), _tail(nullptr) {}
+
+		LinkedList(const LinkedList& list) {
+			_head = nullptr;
+			_tail = nullptr;
+			Node<T>* node = list._head;
+			this->push_tail(new Node<T>(*node));
+			node = node->get_next();
+			while (node != nullptr) {
+				Node<T>* node2 = new Node<T>(*node);
+				this->push_tail(node2);
+				node = node->get_next();
+			}
+		}
+
+		LinkedList(int size, T min, T max) {
+			_head = nullptr;
+			_tail = nullptr;
+			for (int i = 0; i < size; i++) {
+				this->push_tail(new Node<T>(random(min, max)));
+			}
+		}
+
+		T random(T min, T max) {
+			std::random_device random_device;
+			std::mt19937 generator(random_device());
+			std::uniform_int_distribution<> distribution(min, max);
+			T x = distribution(generator);
+			return x;
+		}
+
+		~LinkedList() {
+			Node<T>* node;
+			while (_head != nullptr) {
+				node = _head->_next;
+				delete _head;
+				_head = node;
+			}
+
+			Node<T>* get_tail() const {
+				return _tail;
+			}
+
+
+			Node<T>* get_head() const {
+				return _head;
+			}
+		}
+
+		void push_tail(Node<T>* tail) {
+			if (_tail == nullptr) {
+				_head = tail;
+				_tail = tail;
+				tail->set_next(nullptr);
+				tail->set_prev(nullptr);
+			}
+			else {
+				_tail->set_next(tail);
+				tail->set_next(nullptr);
+				tail->set_prev(_tail);
+				_tail = tail;
+			}
+		}
+	};
 }
