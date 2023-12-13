@@ -10,10 +10,11 @@ namespace fun {
 	template < typename T>
 
 	class Node {
+	private:
 		Node* _next;
 		Node* _prev;
 		T* _val;
-
+	public:
 		Node() {
 			_next = nullptr;
 			_prev = nullptr;
@@ -38,11 +39,9 @@ namespace fun {
 			_val = new T(node._val);
 		}
 
-		~Node() {
-			delete _val;
-		}
+		~Node() = default;
 
-		Node* get_next() const {
+		Node* get_next() {
 			return _next;
 		}
 
@@ -62,8 +61,8 @@ namespace fun {
 			_prev = prev;
 		}
 
-		void set_val(T* val) {
-			_val = val;
+		void set_val(T val) {
+			_val = new T(val);
 		}
 
 		friend ostream& operator<< (ostream& out, Node<T>& node) {
@@ -105,12 +104,9 @@ namespace fun {
 		LinkedList(const LinkedList& list) {
 			_head = nullptr;
 			_tail = nullptr;
-			Node<T>* node = list._head;
-			this->push_tail(new Node<T>(*node));
-			node = node->get_next();
+			Node<T>* node = list.get_head();
 			while (node != nullptr) {
-				Node<T>* node2 = new Node<T>(*node);
-				this->push_tail(node2);
+				push_tail(*(node->get_val()));
 				node = node->get_next();
 			}
 		}
@@ -131,37 +127,193 @@ namespace fun {
 			return x;
 		}
 
-		~LinkedList() {
-			Node<T>* node;
-			while (_head != nullptr) {
-				node = _head->_next;
-				delete _head;
-				_head = node;
-			}
-
-			Node<T>* get_tail() const {
-				return _tail;
-			}
 
 
-			Node<T>* get_head() const {
-				return _head;
-			}
+		Node<T>* get_tail() const {
+			return _tail;
 		}
 
-		void push_tail(Node<T>* tail) {
-			if (_tail == nullptr) {
-				_head = tail;
-				_tail = tail;
-				tail->set_next(nullptr);
-				tail->set_prev(nullptr);
+		Node<T>* get_head() const {
+			return _head;
+		}
+
+
+
+		void push_head(T value) {
+			Node<T>* start = new Node<T>(value);
+			if (_head == nullptr) {
+				_head = start;
+				_tail = start;
+				start->set_next(nullptr);
+				start->set_prev(nullptr);
 			}
 			else {
-				_tail->set_next(tail);
-				tail->set_next(nullptr);
-				tail->set_prev(_tail);
-				_tail = tail;
+				start->set_prev(nullptr);
+				start->set_next(_head);
+				_head->set_prev(start);
+				_head = start;
 			}
 		}
+
+		void push_head(LinkedList<T>* start) {
+			start->_tail->set_next(_head);
+			_head->set_prev(start->_tail);
+			_head = start->_head;
+		}
+
+		void push_tail(T value) {
+			Node<T>* end = new Node<T>(value);
+			if (_tail == nullptr) {
+				_head = end;
+				_tail = end;
+				end->set_next(nullptr);
+				end->set_prev(nullptr);
+			}
+			else {
+				_tail->set_next(end);
+				end->set_next(nullptr);
+				end->set_prev(_tail);
+				_tail = end;
+			}
+		}
+
+		void push_tail(LinkedList<T>* list) {
+			_tail->set_next(list->_head);
+			list->_head->set_prev(_tail);
+			_tail = list->_tail;
+		}
+
+		void push_head(const LinkedList& other) {
+			Node<T>* cur = other.tail;
+			while (cur != nullptr) {
+				push_head(cur->data);
+				cur = cur->prev;
+			}
+		}
+
+
+		void pop_head() {
+			Node<T>* temp(_head);
+			_head->get_next()->set_prev(nullptr);
+			_head = _head->get_next();
+			delete temp->get_val();
+		}
+
+		void pop_tail() {
+			Node<T>* temp(_tail);
+			_tail->get_prev()->set_next(nullptr);
+			_tail = _tail->get_prev();
+			delete temp->get_val();
+		}
+
+		void delete_node(T val) {
+			Node<T>* temp = _head;
+			while (temp != nullptr) {
+				if (*(temp->get_val()) == val) {
+					if (temp == _head) {
+						this->pop_head();
+					}
+					else if (temp == _tail) {
+						this->pop_tail();
+					}
+					else {
+						temp->get_prev()->set_next(temp->get_next());
+						temp->get_next()->set_prev(temp->get_prev());
+
+					}
+
+				}
+				temp = temp->get_next();
+			}
+		}
+
+		friend ostream& operator<< (ostream& out, LinkedList<T>& list) {
+			Node<T>* temp = list._head;
+			while (temp != nullptr) {
+				out << *temp;
+				temp = temp->get_next();
+			}
+			return out;
+		}
+
+		T operator[](int index) {
+			Node<T>* start = _head;
+			if (index > this->size() || index < 0) {
+				throw runtime_error("Index is out of range");
+			}
+			if (start != nullptr && index == 0) {
+				return *(_head->get_val());
+			}
+			for (int i = 0; i < index; i++) {
+				start = start->get_next();
+			}
+			return *(start->get_val());
+		}
+
+
+
+		~LinkedList() = default;
+
+		int size() const {
+			int count = 0;
+			Node<T>* current = _head;
+
+			while (current != nullptr) {
+				++count;
+				current = current->get_next();
+			}
+
+			return count;
+		}
 	};
+	template <typename T>
+	LinkedList<int> sum_list(LinkedList<T>* list_1, LinkedList<T>* list_2) {
+		LinkedList<int> temp;
+		int over_f = 0;
+		Node<int>* right = list_2->get_tail();
+		Node<int>* left = list_1->get_tail();
+		while (right != nullptr && left != nullptr) {
+			int r = *(right->get_val());
+			int l = *(left->get_val());
+			if (r + l + over_f > 9) {
+				temp.push_head((r + l + over_f) % 10);
+				over_f = (r + l + over_f) / 10;
+			}
+			else {
+				temp.push_head(r + l + over_f);
+				over_f = 0;
+			}
+			right = right->get_prev();
+			left = left->get_prev();
+		}
+		while (right != nullptr) {
+			int r = *(right->get_val());
+			if (r + over_f > 9) {
+				temp.push_head((r + over_f) % 10);
+				over_f = 1;
+			}
+			else {
+				temp.push_head(r + over_f);
+				over_f = 0;
+			}
+			right = right->get_prev();
+		}
+		while (left != nullptr) {
+			int l = *(left->get_val());
+			if (l + over_f > 9) {
+				temp.push_head((l + over_f) % 10);
+				over_f = 1;
+			}
+			else {
+				temp.push_head(l + over_f);
+				over_f = 0;
+			}
+			left = left->get_prev();
+		}
+		if (over_f == 1) {
+			temp.push_head(1);
+		}
+		return temp;
+	}
+
 }
