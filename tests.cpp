@@ -49,3 +49,31 @@ TEST(Tests3, Sum1) {
 	EXPECT_TRUE(true);
 }
 
+TEST(Tests4, mullis) {
+	LinkedList<int> list1;
+	list1.push_tail(8);
+	list1.push_tail(9);
+	list1.push_tail(4);
+	LinkedList<int> list2;
+	list2.push_tail(4);
+	list2.push_tail(5);
+	cout << list2 << "\n";
+	cout << list1 << "\n";
+	LinkedList<int> list_mul = mul_list(&list1, &list2);
+	cout << list_mul;
+	EXPECT_TRUE(true);
+}
+
+TEST(Tests5, mullis2) {
+	LinkedList<int> list1;
+	list1.push_tail(8);
+	list1.push_tail(9);
+	LinkedList<int> list2;
+	list2.push_tail(4);
+	list2.push_tail(5);
+	cout << list2 << "\n";
+	cout << list1 << "\n";
+	LinkedList<int> list_mul = mul_list(&list1, &list2);
+	cout << list_mul;
+	EXPECT_TRUE(true);
+}

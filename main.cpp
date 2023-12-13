@@ -127,7 +127,7 @@ namespace fun {
 			return x;
 		}
 
-
+		
 
 		Node<T>* get_tail() const {
 			return _tail;
@@ -137,7 +137,7 @@ namespace fun {
 			return _head;
 		}
 
-
+		
 
 		void push_head(T value) {
 			Node<T>* start = new Node<T>(value);
@@ -162,7 +162,7 @@ namespace fun {
 		}
 
 		void push_tail(T value) {
-			Node<T>* end = new Node<T>(value);
+			Node<T>* end= new Node<T>(value);
 			if (_tail == nullptr) {
 				_head = end;
 				_tail = end;
@@ -214,12 +214,12 @@ namespace fun {
 						this->pop_head();
 					}
 					else if (temp == _tail) {
-						this->pop_tail();
+						 this->pop_tail(); 
 					}
-					else {
+					else{
 						temp->get_prev()->set_next(temp->get_next());
 						temp->get_next()->set_prev(temp->get_prev());
-
+						
 					}
 
 				}
@@ -267,7 +267,7 @@ namespace fun {
 		}
 	};
 	template <typename T>
-	LinkedList<int> sum_list(LinkedList<T>* list_1, LinkedList<T>* list_2) {
+	LinkedList<int> sum_list(LinkedList<T>* list_1 , LinkedList<T>* list_2) {
 		LinkedList<int> temp;
 		int over_f = 0;
 		Node<int>* right = list_2->get_tail();
@@ -308,7 +308,7 @@ namespace fun {
 				temp.push_head(l + over_f);
 				over_f = 0;
 			}
-			left = left->get_prev();
+			left  = left->get_prev();
 		}
 		if (over_f == 1) {
 			temp.push_head(1);
@@ -316,4 +316,39 @@ namespace fun {
 		return temp;
 	}
 
+	template <typename T>
+	LinkedList<int> mul_list(LinkedList<T>* list1, LinkedList<T>* list2) {
+
+	LinkedList<int> result;
+	result.push_head(0);
+
+	Node<int>* right = list2->get_tail();
+	int count = 0;
+	while (right != nullptr) {
+		int r = *(right->get_val());
+		LinkedList<int> temp;
+		int over_f = 0;
+        Node<int>*left = list1->get_tail();
+		while (left != nullptr) {
+			int l = *(left->get_val());
+			temp.push_head((l * r + over_f) % 10);
+			over_f = (l * r + over_f) / 10;
+			left = left->get_prev();
+		}
+		if (over_f != 0) {
+			temp.push_head(over_f);
+		}
+		for (int i = 0; i < count; i++) {
+			temp.push_tail(0);
+		}
+		cout << temp << "\n";
+		
+		result = sum_list(&result, &temp);
+
+        count++;
+		right = right->get_prev();
+	}
+	
+	return result;
+    }
 }
